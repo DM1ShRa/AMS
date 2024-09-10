@@ -1,5 +1,7 @@
+import React from "react";
+
 const Sensors = () => {
-  return <h1>Sensors Page</h1>;
+  return <div>sensors</div>;
 };
 
 export default Sensors;

@@ -1,8 +1,10 @@
+// src/routes/Routes.js
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "../components/home";
-import About from "../components/about";
 import Sensors from "../components/sensors";
+import About from "../components/about";
+import { SignIn } from "@clerk/clerk-react";
 
 const AppRoutes = () => {
   return (
@@ -10,6 +12,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Home />} />
       <Route path="/sensors" element={<Sensors />} />
       <Route path="/about" element={<About />} />
+      <Route path="/sign-in/*" element={<SignIn />} />
     </Routes>
   );
 };
