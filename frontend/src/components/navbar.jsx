@@ -6,9 +6,9 @@ const Navbar = () => {
   const { isSignedIn } = useUser();
   return (
     <nav>
-      {isSignedIn && <Link to="/">Home</Link>}
+      <Link to="/">Home</Link>
       {isSignedIn && <Link to="/sensors">Sensors</Link>}
-      {isSignedIn && <Link to="/about">About</Link>}
+      <Link to="/about">About</Link>
       {isSignedIn ? <SignOutButton /> : <SignInButton />}
     </nav>
   );
