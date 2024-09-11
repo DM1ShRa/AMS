@@ -1,8 +1,3 @@
-# Ignore environment variables
 .env
-
-# Ignore JSON file (replace with the exact filename if it's specific)
 *.json
-
-# Ignore virtual environment
 venv/
