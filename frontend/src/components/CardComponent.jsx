@@ -1,7 +1,13 @@
-// CardComponent.jsx
 import React from "react";
 
-const CardComponent = ({ imageUrl, title, description, authorName, authorImage, date }) => {
+const CardComponent = ({
+  imageUrl,
+  title,
+  description,
+  authorName,
+  authorImage,
+  date,
+}) => {
   return (
     <div className="py-20 max-w-sm w-full lg:max-w-full lg:flex">
       <div
@@ -27,17 +33,20 @@ const CardComponent = ({ imageUrl, title, description, authorName, authorImage, 
           <p className="text-gray-700 text-base">{description}</p>
         </div>
         <div class="px-1 pb-4 pt-0 mt-2">
-    <button class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none" type="button">
-      Read more
-    </button>
-  </div>
+          <button
+            class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+            type="button"
+          >
+            Read more
+          </button>
+        </div>
         <div className="flex items-center">
           <img
             className="w-10 h-10 rounded-full mr-4"
             src={authorImage}
             alt={`Avatar of ${authorName}`}
           />
-          
+
           <div className="text-sm">
             <p className="text-gray-900 leading-none">{authorName}</p>
             <p className="text-gray-600">{date}</p>

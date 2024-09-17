@@ -1,9 +1,52 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import CardComponent from "./CardComponent";
 import ContactUs from "./ContactUs";
-
+import { db } from "../Firebase/firebaseConfig";
+import { useAuth } from "@clerk/clerk-react";
+import { doc, getDoc } from "firebase/firestore";
 
 const Home = () => {
+  const { userId } = useAuth();
+  const [userSensors, setUserSensors] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserSensors = async () => {
+      if (userId) {
+        try {
+          setLoading(true);
+          const userDocRef = doc(db, "users", userId);
+          const userDoc = await getDoc(userDocRef);
+
+          if (!userDoc.exists()) {
+            console.log("Waiting for document creation...");
+            setTimeout(fetchUserSensors, 1000);
+          } else {
+            const userData = userDoc.data();
+            setUserSensors(userData?.Sensors || []);
+          }
+        } catch (error) {
+          console.error("Error fetching user sensors:", error);
+          setUserSensors([]);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    if (userId) {
+      fetchUserSensors();
+    } else {
+      setUserSensors([]);
+      setLoading(false);
+    }
+  }, [userId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
       <div className="bg-transparent dark:bg-gray-900">
@@ -43,11 +86,7 @@ const Home = () => {
             </a>
           </div>
           <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
-            <img
-              src='./Alerts.jpg'
-              alt="mockup"
-              className="rounded-lg"
-            />
+            <img src="./Alerts.jpg" alt="mockup" className="rounded-lg" />
           </div>
         </div>
       </div>
@@ -66,87 +105,127 @@ const Home = () => {
         </div>
         {/* Image Section */}
         <div className="flex flex-col space-y-4">
-          
-
-<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-    <div class="grid gap-4">
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image.jpg" alt=""/>
-        </div>
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-1.jpg" alt=""/>
-        </div>
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-2.jpg" alt=""/>
-        </div>
-    </div>
-    <div class="grid gap-4">
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-3.jpg" alt=""/>
-        </div>
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-4.jpg" alt=""/>
-        </div>
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-5.jpg" alt=""/>
-        </div>
-    </div>
-    <div class="grid gap-4">
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-6.jpg" alt=""/>
-        </div>
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-7.jpg" alt=""/>
-        </div>
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-8.jpg" alt=""/>
-        </div>
-    </div>
-    <div class="grid gap-4">
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-9.jpg" alt=""/>
-        </div>
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-10.jpg" alt=""/>
-        </div>
-        <div>
-            <img class="h-auto max-w-full rounded-lg" src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-11.jpg" alt=""/>
-        </div>
-    </div>
-</div>
-
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid gap-4">
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image.jpg"
+                  alt=""
+                />
+              </div>
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-1.jpg"
+                  alt=""
+                />
+              </div>
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-2.jpg"
+                  alt=""
+                />
+              </div>
+            </div>
+            <div class="grid gap-4">
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-3.jpg"
+                  alt=""
+                />
+              </div>
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-4.jpg"
+                  alt=""
+                />
+              </div>
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-5.jpg"
+                  alt=""
+                />
+              </div>
+            </div>
+            <div class="grid gap-4">
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-6.jpg"
+                  alt=""
+                />
+              </div>
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-7.jpg"
+                  alt=""
+                />
+              </div>
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-8.jpg"
+                  alt=""
+                />
+              </div>
+            </div>
+            <div class="grid gap-4">
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-9.jpg"
+                  alt=""
+                />
+              </div>
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-10.jpg"
+                  alt=""
+                />
+              </div>
+              <div>
+                <img
+                  class="h-auto max-w-full rounded-lg"
+                  src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-11.jpg"
+                  alt=""
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Card components with increased gap */}
       <div className="py-12 px-6 mx-auto max-w-screen-xl grid gap-12 lg:grid-cols-3">
         {/* Card 1 */}
-        <CardComponent
-          imageUrl="https://firetechglobal.com/wp-content/uploads/2024/04/causes-of-fire-incidents-0-1024x683-1.webp"
-          title="Can coffee make you a better developer?"
-          description="Lorem ipsum dolor sit amet, consectetur adipisicing elit."
-          authorName="Jonathan Reinink"
-          authorImage="https://via.placeholder.com/50"
-          date="Aug 18"
-        />
+        {userSensors && userSensors.includes("FireSensor") && (
+          <CardComponent
+            imageUrl="https://firetechglobal.com/wp-content/uploads/2024/04/causes-of-fire-incidents-0-1024x683-1.webp"
+            title="Can coffee make you a better developer?"
+            description="Lorem ipsum dolor sit amet, consectetur adipisicing elit."
+            authorName="Jonathan Reinink"
+            authorImage="https://via.placeholder.com/50"
+            date="Aug 18"
+          />
+        )}
         {/* Card 2 */}
-        <CardComponent
-          imageUrl="https://taraenergy.com/wp-content/uploads/2022/12/Gas-Leaks-Image-of-Gas-Pipe-Blowing-Steam-scaled.jpeg"
-          title="The secret to productivity"
-          description="Voluptatibus quia, nulla! Maiores et perferendis eaque."
-          authorName="Sarah Doe"
-          authorImage="https://via.placeholder.com/50"
-          date="Sep 25"
-        />
-        {/* Card 3 */}
-        <CardComponent
-          imageUrl="https://plus.unsplash.com/premium_photo-1695914233513-6f9ca230abdb?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bmF0dXJhbCUyMGRpc2FzdGVyfGVufDB8fDB8fHww"
-          title="Why you should write more code"
-          description="Consectetur adipisicing elit. Voluptatibus quia, nulla!"
-          authorName="Jane Smith"
-          authorImage="https://via.placeholder.com/50"
-          date="Oct 1"
-        />
+        {userSensors && userSensors.includes("GasSensor") && (
+          <CardComponent
+            imageUrl="https://taraenergy.com/wp-content/uploads/2022/12/Gas-Leaks-Image-of-Gas-Pipe-Blowing-Steam-scaled.jpeg"
+            title="The secret to productivity"
+            description="Voluptatibus quia, nulla! Maiores et perferendis eaque."
+            authorName="Sarah Doe"
+            authorImage="https://via.placeholder.com/50"
+            date="Sep 25"
+          />
+        )}
       </div>
 
       {/* Contact Us section */}

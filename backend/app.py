@@ -35,7 +35,8 @@ def webhook_handler():
                 'first_name': user_data.get('first_name'),
                 'last_name': user_data.get('last_name'),
                 'email': user_data.get('email_addresses', [{}])[0].get('email_address'),
-                'clerk_user_id': user_id
+                'clerk_user_id': user_id,
+                'Sensors': ['FireSensor']
             }
 
             print(filtered_data)
