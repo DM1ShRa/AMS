@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { AiOutlineFire, AiOutlineWarning } from "react-icons/ai"; // Icons for Components
-import { Line } from "react-chartjs-2"; // Chart for data visualization
+import { AiOutlineFire, AiOutlineWarning } from "react-icons/ai";
+import { Line } from "react-chartjs-2";
 import ReactFlow from "reactflow";
 import { HoverEffect } from "./ui/cardhover";
-import "reactflow/dist/style.css"; // React Flow CSS
-import { cn } from "../../lib/util"; // Classnames for conditional class handling
+import "reactflow/dist/style.css";
+import { cn } from "../../lib/util";
 
 import {
   CategoryScale,
@@ -17,8 +17,15 @@ import {
   Legend,
 } from "chart.js";
 
-// Register the required chart.js components
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 // Temperature Data for Chart.js Visualization
 const tempData = {
@@ -36,18 +43,54 @@ const tempData = {
 
 // Nodes and Edges for Fire Detection Scenario
 const fireNodes = [
-  { id: "1", position: { x: 150, y: 0 }, data: { label: "Fire Detected by Sensor" }, type: "input" },
-  { id: "2", position: { x: 150, y: 100 }, data: { label: "Alert Sent to Authority" } },
-  { id: "3", position: { x: 150, y: 200 }, data: { label: "Authority Dispatches Response Team" } },
-  { id: "4", position: { x: 150, y: 300 }, data: { label: "Estimated Time: 15 minutes" }, type: "output" },
+  {
+    id: "1",
+    position: { x: 150, y: 0 },
+    data: { label: "Fire Detected by Sensor" },
+    type: "input",
+  },
+  {
+    id: "2",
+    position: { x: 150, y: 100 },
+    data: { label: "Alert Sent to Authority" },
+  },
+  {
+    id: "3",
+    position: { x: 150, y: 200 },
+    data: { label: "Authority Dispatches Response Team" },
+  },
+  {
+    id: "4",
+    position: { x: 150, y: 300 },
+    data: { label: "Estimated Time: 15 minutes" },
+    type: "output",
+  },
 ];
 
 // Nodes and Edges for Gas Leak Detection Scenario
 const gasNodes = [
-  { id: "1", position: { x: 150, y: 0 }, data: { label: "Gas Leak Detected by Sensor" }, type: "input" },
-  { id: "2", position: { x: 150, y: 100 }, data: { label: "Alert Sent to Authority" } },
-  { id: "3", position: { x: 150, y: 200 }, data: { label: "Authority Dispatches Response Team" } },
-  { id: "4", position: { x: 150, y: 300 }, data: { label: "Estimated Time: 10 minutes" }, type: "output" },
+  {
+    id: "1",
+    position: { x: 150, y: 0 },
+    data: { label: "Gas Leak Detected by Sensor" },
+    type: "input",
+  },
+  {
+    id: "2",
+    position: { x: 150, y: 100 },
+    data: { label: "Alert Sent to Authority" },
+  },
+  {
+    id: "3",
+    position: { x: 150, y: 200 },
+    data: { label: "Authority Dispatches Response Team" },
+  },
+  {
+    id: "4",
+    position: { x: 150, y: 300 },
+    data: { label: "Estimated Time: 10 minutes" },
+    type: "output",
+  },
 ];
 
 // Common edges for both scenarios
@@ -105,7 +148,10 @@ const Sensors = () => {
               )}
               onClick={() => handleScenarioChange("gas")}
             >
-              <AiOutlineWarning size={30} className="mx-auto mb-2 text-yellow-600" />
+              <AiOutlineWarning
+                size={30}
+                className="mx-auto mb-2 text-yellow-600"
+              />
               Gas Leak Detection
             </button>
           </div>
@@ -113,21 +159,32 @@ const Sensors = () => {
           {/* React Flow Diagram */}
           <h3 className="text-2xl font-semibold mb-4">System Workflow</h3>
           <div className="h-96 bg-white rounded-lg shadow-lg p-4 dark:bg-gray-800">
-            <ReactFlow nodes={nodes} edges={edges} fitView onNodeClick={handleNodeClick} />
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              fitView
+              onNodeClick={handleNodeClick}
+            />
           </div>
           <p className="text-sm text-gray-500 mt-4 text-center">
-            * Workflow: The selected scenario is processed by sensors, alerts are sent, and authorities respond accordingly.
+            * Workflow: The selected scenario is processed by sensors, alerts
+            are sent, and authorities respond accordingly.
           </p>
 
           {/* Card to show node information when a node is clicked */}
           {selectedNode && (
             <div className="absolute top-16 right-16 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-[300px]">
               <div className="flex justify-between">
-                <h4 className="text-xl font-semibold">{selectedNode.data.label}</h4>
-                <button onClick={closeCard} className="text-red-500">X</button>
+                <h4 className="text-xl font-semibold">
+                  {selectedNode.data.label}
+                </h4>
+                <button onClick={closeCard} className="text-red-500">
+                  X
+                </button>
               </div>
               <p className="text-gray-500 dark:text-gray-400">
-                Information about {selectedNode.data.label}. This node shows the details of the current workflow step.
+                Information about {selectedNode.data.label}. This node shows the
+                details of the current workflow step.
               </p>
             </div>
           )}
@@ -154,8 +211,13 @@ const Sensors = () => {
         <div className="container mx-auto text-center">
           <p className="text-sm">
             © 2024 Flowbite. All rights reserved. |
-            <a href="#" className="text-primary-400 hover:text-primary-300">Privacy Policy</a> |
-            <a href="#" className="text-primary-400 hover:text-primary-300">Terms of Service</a>
+            <a href="#" className="text-primary-400 hover:text-primary-300">
+              Privacy Policy
+            </a>{" "}
+            |
+            <a href="#" className="text-primary-400 hover:text-primary-300">
+              Terms of Service
+            </a>
           </p>
         </div>
       </footer>
@@ -170,44 +232,43 @@ export const projects = [
     description:
       "Detect anomalies in data streams to identify unusual patterns that may indicate critical incidents.",
     link: "#anomaly-detection",
-    icon : 'maintain',
+    icon: "maintain",
   },
   {
     title: "Predictive Maintenance",
     description:
       "Utilize sensor data to predict equipment failures and schedule timely maintenance.",
     link: "#predictive-maintenance",
-    icon : 'maintenance'
+    icon: "maintenance",
   },
   {
     title: "Machine Learning",
     description:
       "Implement machine learning algorithms to improve system performance over time.",
     link: "#machine-learning",
-    icon: 'ai'
+    icon: "ai",
   },
   {
     title: "Sensor Integration",
     description:
       "Integrate various sensors to collect real-time data for comprehensive analysis.",
     link: "#sensor-integration",
-    icon : 'sensor'
+    icon: "sensor",
   },
   {
     title: "Data Visualization",
     description:
       "Visualize data using interactive charts and graphs for better insights.",
     link: "#data-visualization",
-    icon :  'graph'
+    icon: "graph",
   },
   {
     title: "Real-time Monitoring",
     description:
       "Monitor systems in real-time to detect and respond to events promptly.",
     link: "#real-time-monitoring",
-    icon : 'monitoring',
+    icon: "monitoring",
   },
-
 ];
 
 export default Sensors;
