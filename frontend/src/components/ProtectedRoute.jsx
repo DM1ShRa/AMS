@@ -1,11 +1,11 @@
 import React from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useUser, RedirectToSignIn } from "@clerk/clerk-react";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
   const { isSignedIn, user } = useUser();
   if (!isSignedIn) {
-    return <Navigate to="/sign-in" />;
+    return <RedirectToSignIn />;
   }
 
   const isAuthority = user?.publicMetadata?.role === "authority";
