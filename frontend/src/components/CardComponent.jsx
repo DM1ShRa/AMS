@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import ModalComponent from "./modal";
-import SensorDetails from "./sensorDetails";
+import SensorDetailsWithSWR from "./sensorDetails";
 
 const CardComponent = ({
   imageUrl,
@@ -55,7 +55,7 @@ const CardComponent = ({
       </div>
 
       <ModalComponent show={showModal} handleClose={handleCloseModal}>
-        <SensorDetails sensorId={sensorId} />
+        <SensorDetailsWithSWR sensorId={sensorId} />
       </ModalComponent>
     </div>
   );
