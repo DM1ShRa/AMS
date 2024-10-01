@@ -7,18 +7,28 @@ const ModalComponent = ({ show, handleClose, children }) => {
   const { user } = useUser();
 
   const handleAlert = async () => {
-    const alertData = {
-      message: "Alert generated!",
-      timestamp: new Date(),
-      userName: user?.firstName || "Unknown User",
-      userEmail: user?.emailAddresses[0]?.emailAddress || "Unknown Email",
-    };
-
-    try {
-      const docRef = await addDoc(collection(db, "alerts"), alertData);
-      console.log("Alert added with ID:", docRef.id);
-    } catch (e) {
-      console.error("Error adding alert:", e);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        const alertData = {
+          message: "Alert generated!",
+          timestamp: new Date(),
+          userName: user?.firstName || "Unknown User",
+          userEmail: user?.emailAddresses[0]?.emailAddress || "Unknown Email",
+          location: {
+            latitude: latitude,
+            longitude: longitude,
+          },
+        };
+        try {
+          const docRef = await addDoc(collection(db, "alerts"), alertData);
+          console.log("Alert added with ID:", docRef.id);
+        } catch (e) {
+          console.error("Error adding alert:", e);
+        }
+      });
+    } else {
+      console.error("Geolocation is not supported by this browser.");
     }
   };
   if (!show) return null;

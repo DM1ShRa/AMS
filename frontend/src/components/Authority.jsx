@@ -4,6 +4,17 @@ import { db } from "../Firebase/firebaseConfig";
 import { collection, onSnapshot } from "firebase/firestore";
 import { checkRole } from "../utils/roles";
 import { useUser } from "@clerk/clerk-react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
 
 const Authority = () => {
   const navigate = useNavigate();
@@ -43,6 +54,37 @@ const Authority = () => {
           </li>
         ))}
       </ul>
+      <MapContainer
+        center={[19.035, 73.021]}
+        zoom={13}
+        style={{ height: "500px", width: "100%" }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {alerts.map((alert) => {
+          if (alert.location?.latitude && alert.location?.longitude) {
+            return (
+              <Marker
+                key={alert.id}
+                position={[alert.location.latitude, alert.location.longitude]}
+              >
+                <Popup>
+                  <strong>{alert.userName}</strong>
+                  <br />
+                  {alert.userEmail}
+                  <br />
+                  {alert.message}
+                  <br />
+                  {new Date(alert.timestamp.seconds * 1000).toString()}
+                </Popup>
+              </Marker>
+            );
+          }
+          return null;
+        })}
+      </MapContainer>
     </div>
   );
 };
