@@ -22,9 +22,14 @@ const AppRoutes = () => {
       }
     }
   }, [isLoaded, isSignedIn, user, navigate]);
+  const Spinner = () => (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-gray-500"></div>
+    </div>
+  );
 
   if (!isLoaded) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
   return (
     <Routes>

@@ -1,11 +1,11 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import CardComponent from "./CardComponent";
 import SensorSelectionForm from "./sensorSelectionForm";
 import ContactUs from "./ContactUs";
 import { db } from "../Firebase/firebaseConfig";
 import { useAuth } from "@clerk/clerk-react";
 import { doc, getDoc } from "firebase/firestore";
+import MLAnalysis from "./MLAnalysis"; 
 
 const Home = () => {
   const { userId } = useAuth();
@@ -74,8 +74,15 @@ const Home = () => {
     setShowSensorForm(false);
   };
 
+  // Spinner component (CSS-in-JS for convenience)
+  const Spinner = () => (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-gray-400"></div>
+    </div>
+  );
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   return (
@@ -93,8 +100,7 @@ const Home = () => {
                 Accident Management System
               </h1>
               <p className="mb-6 max-w-2xl font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
-                From checkout to global sales tax compliance, companies around
-                the world use Flowbite to simplify their payment stack.
+              From real-time detection to automated alerts, our system helps save lives by preventing accidents and streamlining emergency responses.
               </p>
               <a
                 href="#"
@@ -122,67 +128,43 @@ const Home = () => {
               </a>
             </div>
             <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
-              <img src="./Alerts.jpg" alt="mockup" className="rounded-lg" />
+              <img src="https://earthquake.ca.gov/wp-content/uploads/sites/8/2020/09/android_alerts.gif" alt="mockup" className="rounded-lg" />
             </div>
           </div>
         </div>
         {/* New Section with Image and Text */}
-        <div className="py-48 px-6 mx-auto max-w-screen-xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="py-64 px-6 mx-auto max-w-screen-xl grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Text Section */}
           <div>
-            <h2 className="mb-4 text-3xl font-extrabold leading-none dark:text-gray-900">
-              We didn't reinvent the wheel
+            <h2 className="mb-4 text-4xl font-extrabold leading-none dark:text-gray-900 ">
+            Empowering safety with intelligent technology and real-time solutions.
             </h2>
             <p className="mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
-              We are strategists, designers and developers. Innovators and
-              problem solvers.
+            Turning innovation into life-saving actions, one alert at a time.
             </p>
           </div>
           {/* Image Section */}
           <div className="flex flex-col space-y-4">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div class="grid gap-4">
+            <div class="grid gap-4">
                 <div>
                   <img
                     class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image.jpg"
+                    src="https://www.beyondcarlton.org/wp-content/uploads/2018/09/building-fire.jpg"
                     alt=""
                   />
                 </div>
                 <div>
                   <img
                     class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-1.jpg"
+                    src="https://icons.veryicon.com/png/o/miscellaneous/gis-map-icon/fire-accident.png"
                     alt=""
                   />
                 </div>
                 <div>
                   <img
                     class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-2.jpg"
-                    alt=""
-                  />
-                </div>
-              </div>
-              <div class="grid gap-4">
-                <div>
-                  <img
-                    class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-3.jpg"
-                    alt=""
-                  />
-                </div>
-                <div>
-                  <img
-                    class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-4.jpg"
-                    alt=""
-                  />
-                </div>
-                <div>
-                  <img
-                    class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-5.jpg"
+                    src="https://keywordconnects.com/wp-content/uploads/2021/05/Google-Alerts-1024x536.png"
                     alt=""
                   />
                 </div>
@@ -191,21 +173,21 @@ const Home = () => {
                 <div>
                   <img
                     class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-6.jpg"
+                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_wdqH6dLwBRUzaCx5wqemOu-0wqdbxEvNRg&s"
                     alt=""
                   />
                 </div>
                 <div>
                   <img
                     class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-7.jpg"
+                    src="https://cdn-icons-png.flaticon.com/512/6999/6999509.png"
                     alt=""
                   />
                 </div>
                 <div>
                   <img
                     class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-8.jpg"
+                    src="https://media.licdn.com/dms/image/D5612AQHu5FAO51AUMw/article-cover_image-shrink_600_2000/0/1702895898103?e=2147483647&v=beta&t=mrKsAqVh8tzX6GujFunY5XYk5nejTlPvKXOY-gHrejo"
                     alt=""
                   />
                 </div>
@@ -214,21 +196,44 @@ const Home = () => {
                 <div>
                   <img
                     class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-9.jpg"
+                    src="https://ineqe.com/wp-content/uploads/2023/04/INEQESSZM-Emergency-Alerts-graphic.jpeg"
                     alt=""
                   />
                 </div>
                 <div>
                   <img
                     class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-10.jpg"
+                    src="https://www.shutterstock.com/image-vector/simple-line-icon-represent-internet-600nw-747671581.jpg"
                     alt=""
                   />
                 </div>
                 <div>
                   <img
                     class="h-auto max-w-full rounded-lg"
-                    src="https://flowbite.s3.amazonaws.com/docs/gallery/masonry/image-11.jpg"
+                    src="https://static.vecteezy.com/system/resources/previews/004/578/942/original/analyze-business-development-and-incident-management-free-vector.jpg"
+                    alt=""
+                  />
+                </div>
+              </div>
+              <div class="grid gap-4">
+                <div>
+                  <img
+                    class="h-auto max-w-full rounded-lg"
+                    src="https://firebase.google.com/images/social.png"
+                    alt=""
+                  />
+                </div>
+                <div>
+                  <img
+                    class="h-auto max-w-full rounded-lg"
+                    src="https://media.istockphoto.com/id/1769894534/vector/house-danger-fire-icon-silhouette.jpg?b=1&s=170x170&k=20&c=1UBnqCLR1sSTbsx0rto_AzCzsxEJT7F0ZDWwdsm9SLQ="
+                    alt=""
+                  />
+                </div>
+                <div>
+                  <img
+                    class="h-auto max-w-full rounded-lg"
+                    src="https://img.freepik.com/premium-vector/hot-cold-temperature-vector-pictogram-thermometer-icon-symbol-set-isolated-white-background-vector-eps-10_532800-296.jpg"
                     alt=""
                   />
                 </div>
@@ -240,37 +245,40 @@ const Home = () => {
         {showSensorForm ? (
           <SensorSelectionForm onSensorsUpdated={handleSensorsUpdated} />
         ) : (
-          <div className="py-12 px-6 mx-auto max-w-screen-xl grid gap-12 lg:grid-cols-3">
-            {/* Card 1 */}
-            {userSensors && userSensors.includes("FireSensor") && (
-              <CardComponent
-                imageUrl="https://firetechglobal.com/wp-content/uploads/2024/04/causes-of-fire-incidents-0-1024x683-1.webp"
-                title="Can coffee make you a better developer?"
-                description="Lorem ipsum dolor sit amet, consectetur adipisicing elit."
-                authorName="Jonathan Reinink"
-                authorImage="https://via.placeholder.com/50"
-                date="Aug 18"
-              />
-            )}
-            {/* Card 2 */}
-            {userSensors && userSensors.includes("GasSensor") && (
-              <CardComponent
-                imageUrl="https://taraenergy.com/wp-content/uploads/2022/12/Gas-Leaks-Image-of-Gas-Pipe-Blowing-Steam-scaled.jpeg"
-                title="The secret to productivity"
-                description="Voluptatibus quia, nulla! Maiores et perferendis eaque."
-                authorName="Sarah Doe"
-                authorImage="https://via.placeholder.com/50"
-                date="Sep 25"
-              />
-            )}
-          </div>
+          <>
+            <div className="py-8 px-6 mx-auto max-w-screen-xl grid gap-12 lg:grid-cols-3">
+              {userSensors && userSensors.includes("FireSensor") && (
+                <CardComponent
+                  imageUrl="https://firetechglobal.com/wp-content/uploads/2024/04/causes-of-fire-incidents-0-1024x683-1.webp"
+                  title="Can coffee make you a better developer?"
+                  description="Lorem ipsum dolor sit amet, consectetur adipisicing elit."
+                  authorName="Jonathan Reinink"
+                  authorImage="https://via.placeholder.com/50"
+                  date="Aug 18"
+                />
+              )}
+              {userSensors && userSensors.includes("GasSensor") && (
+                <CardComponent
+                  imageUrl="https://taraenergy.com/wp-content/uploads/2022/12/Gas-Leaks-Image-of-Gas-Pipe-Blowing-Steam-scaled.jpeg"
+                  title="The secret to productivity"
+                  description="Voluptatibus quia, nulla! Maiores et perferendis eaque."
+                  authorName="Sarah Doe"
+                  authorImage="https://via.placeholder.com/50"
+                  date="Sep 25"
+                />
+              )}
+            </div>
+
+            {/* ML Analysis component */}
+            <MLAnalysis userSensors={userSensors} />
+          </>
         )}
         ;{/* Contact Us section */}
-        <div className="py-12 px-6">
+        <div className="py-40 px-6">
           <ContactUs />
         </div>
         {/* Footer */}
-        <footer className="bg-gray-900 text-white py-6 mt-12">
+        <footer className="bg-gray-900 text-white py-8 mt-6">
           <div className="container mx-auto text-center">
             <p className="text-sm">
               © 2024 RakshaNetra. All rights reserved. |

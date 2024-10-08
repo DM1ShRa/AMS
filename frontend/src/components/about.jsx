@@ -1,5 +1,6 @@
 import React from "react";
 import { FaStar, FaAward, FaUsers, FaHeartbeat, FaLightbulb, FaHandsHelping } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const About = () => {
   return (
@@ -13,7 +14,8 @@ const About = () => {
           Meet our dynamic team and discover the roadmap to success as we let you know how we work.
         </p>
         <button className="px-6 py-3 bg-slate-600 text-white rounded-full hover:bg-slate-900 transition duration-300">
-          Let's Talk
+          <Link to='/'>Let's Talk</Link>
+          
         </button>
       </section>
 

@@ -2,30 +2,24 @@ import React, { useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { db } from "../Firebase/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
+import { toast, Toaster } from "react-hot-toast";
+import { useForm, Controller } from "react-hook-form";
+import Select from "react-select";
+import { Switch } from "@headlessui/react";
+import { motion } from "framer-motion";
+
+const sensorOptions = [
+  { value: "FireSensor", label: "Fire Sensor" },
+  { value: "GasSensor", label: "Gas Sensor" },
+];
 
 const SensorSelectionForm = ({ onSensorsUpdated }) => {
   const { userId } = useAuth();
-  const [selectedSensors, setSelectedSensors] = useState([]);
+  const { control, handleSubmit } = useForm();
   const [noSensors, setNoSensors] = useState(false);
 
-  const handleSensorChange = (e) => {
-    const value = e.target.value;
-    setSelectedSensors((prevState) =>
-      prevState.includes(value)
-        ? prevState.filter((sensor) => sensor !== value)
-        : [...prevState, value]
-    );
-  };
-
-  const handleNoSensorsChange = (e) => {
-    setNoSensors(e.target.checked);
-    if (e.target.checked) {
-      setSelectedSensors([]);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
+    const selectedSensors = data.sensors ? data.sensors.map((s) => s.value) : [];
     if (userId) {
       try {
         await setDoc(
@@ -37,57 +31,87 @@ const SensorSelectionForm = ({ onSensorsUpdated }) => {
           { merge: true }
         );
 
-        alert("Sensors saved successfully!");
+        toast.success("Sensors saved successfully!", {
+          duration: 3000,
+          position: "top-right",
+        });
 
         onSensorsUpdated(noSensors ? [] : selectedSensors);
       } catch (error) {
         console.error("Error saving sensors:", error);
-        alert("Error saving sensors. Please try again.");
+        toast.error("Error saving sensors. Please try again.", {
+          duration: 3000,
+          position: "top-right",
+        });
       }
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-gray-100 rounded-lg">
-      <h2 className="text-lg font-bold mb-4">Select Your Installed Sensors</h2>
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">
-          <input
-            type="checkbox"
-            value="FireSensor"
-            disabled={noSensors}
-            checked={selectedSensors.includes("FireSensor")}
-            onChange={handleSensorChange}
-          />
-          Fire Sensor
-        </label>
-        <label className="block text-sm font-medium mb-2">
-          <input
-            type="checkbox"
-            value="GasSensor"
-            disabled={noSensors}
-            checked={selectedSensors.includes("GasSensor")}
-            onChange={handleSensorChange}
-          />
-          Gas Sensor
-        </label>
-        <label className="block text-sm font-medium mb-2">
-          <input
-            type="checkbox"
-            checked={noSensors}
-            onChange={handleNoSensorsChange}
-          />
-          No Sensors Installed
-        </label>
-      </div>
-      <button
-        type="submit"
-        className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-        disabled={selectedSensors.length === 0 && !noSensors}
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="p-6 bg-white rounded-lg shadow-lg"
       >
-        Save Sensors
-      </button>
-    </form>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">
+            Select Your Installed Sensors
+          </h2>
+
+          {/* Sensors Selection */}
+          <div className="mb-6">
+            <Controller
+              name="sensors"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={sensorOptions}
+                  isMulti
+                  isDisabled={noSensors}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  placeholder="Select sensors..."
+                />
+              )}
+            />
+          </div>
+
+          {/* No Sensors Toggle */}
+          <div className="flex items-center mb-6">
+            <Switch.Group>
+              <Switch.Label className="mr-4">No Sensors Installed</Switch.Label>
+              <Switch
+                checked={noSensors}
+                onChange={setNoSensors}
+                className={`${
+                  noSensors ? "bg-red-600" : "bg-gray-200"
+                } relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none`}
+              >
+                <span
+                  className={`${
+                    noSensors ? "translate-x-6" : "translate-x-1"
+                  } inline-block w-4 h-4 transform bg-white rounded-full transition-transform`}
+                />
+              </Switch>
+            </Switch.Group>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none"
+            disabled={noSensors || !noSensors && !sensorOptions.length}
+          >
+            Save Sensors
+          </button>
+        </form>
+      </motion.div>
+
+      <Toaster />
+    </>
   );
 };
 
