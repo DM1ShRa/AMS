@@ -127,7 +127,7 @@ const Home = () => {
                 Speak to Sales
               </a>
             </div>
-            <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
+            <div className="hidden lg:mt-10 lg:col-span-5  lg:flex">
               <img src="https://earthquake.ca.gov/wp-content/uploads/sites/8/2020/09/android_alerts.gif" alt="mockup" className="rounded-lg" />
             </div>
           </div>

@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../Firebase/firebaseConfig";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, updateDoc, doc } from "firebase/firestore";
 import { checkRole } from "../utils/roles";
 import { useUser } from "@clerk/clerk-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-// Leaflet Icon setup
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -49,10 +48,21 @@ const Authority = () => {
     return () => unsubscribe();
   }, []);
 
+  const closeAlert = async (alertId) => {
+    try {
+      const alertRef = doc(db, "alerts", alertId);
+      await updateDoc(alertRef, {
+        isClosed: true, 
+      });
+      console.log(`Alert with ID: ${alertId} marked as closed.`);
+    } catch (e) {
+      console.error("Error closing alert:", e);
+    }
+  };
+
   return (
     <>
       <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white py-12 px-6">
-        {/* Hero Section */}
         <div className="grid py-8 px-4 mx-auto max-w-screen-xl lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
           <div className="place-self-center mr-auto lg:col-span-7">
             <h1 className="mb-4 max-w-2xl text-4xl font-extrabold leading-none md:text-5xl xl:text-6xl dark:text-white">
@@ -80,56 +90,73 @@ const Authority = () => {
               </svg>
             </a>
           </div>
-          <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
-            <img src="https://earthquake.ca.gov/wp-content/uploads/sites/8/2020/09/android_alerts.gif" alt="alerts mockup" className="rounded-lg" />
-          </div>
         </div>
 
-        {/* Alerts Section */}
         <div className="py-12 px-6 mx-auto max-w-screen-xl" id="alerts">
           <h2 className="text-3xl font-extrabold mb-6">Recent Alerts</h2>
           <ul className="grid gap-6 lg:grid-cols-2">
-            {alerts.map((alert) => (
-              <li key={alert.id} className="p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
-                <h3 className="text-lg font-bold">{alert.message}</h3>
-                <p className="text-gray-600 dark:text-gray-400">{new Date(alert.timestamp.seconds * 1000).toString()}</p>
-                <strong>User Name:</strong> {alert.userName} <br />
-                <strong>User Email:</strong> {alert.userEmail}
-              </li>
-            ))}
+            {alerts
+              .filter((alert) => !alert.isClosed)
+              .map((alert) => (
+                <li
+                  key={alert.id}
+                  className="p-6 bg-white rounded-lg shadow-md dark:bg-gray-800"
+                >
+                  <h3 className="text-lg font-bold">{alert.message}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {new Date(alert.timestamp.seconds * 1000).toString()}
+                  </p>
+                  <strong>User Name:</strong> {alert.userName} <br />
+                  <strong>User Email:</strong> {alert.userEmail}
+                  <br />
+                  <button
+                    className="mt-4 bg-red-500 text-white py-2 px-4 rounded"
+                    onClick={() => closeAlert(alert.id)}
+                  >
+                    Close Alert
+                  </button>
+                </li>
+              ))}
           </ul>
         </div>
 
-        {/* Map Section */}
         <div className="py-12 px-6 mx-auto max-w-screen-xl">
           <h2 className="text-3xl font-extrabold mb-6">Incident Locations</h2>
-          <MapContainer center={[19.035, 73.021]} zoom={13} style={{ height: "500px", width: "100%" }}>
+          <MapContainer
+            center={[19.035, 73.021]}
+            zoom={13}
+            style={{ height: "500px", width: "100%" }}
+          >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {alerts.map((alert) => {
-              if (alert.location?.latitude && alert.location?.longitude) {
-                return (
-                  <Marker key={alert.id} position={[alert.location.latitude, alert.location.longitude]}>
-                    <Popup>
-                      <strong>{alert.userName}</strong>
-                      <br />
-                      {alert.userEmail}
-                      <br />
-                      {alert.message}
-                      <br />
-                      {new Date(alert.timestamp.seconds * 1000).toString()}
-                    </Popup>
-                  </Marker>
-                );
-              }
-              return null;
-            })}
+            {alerts
+              .filter((alert) => !alert.isClosed) 
+              .map((alert) => {
+                if (alert.location?.latitude && alert.location?.longitude) {
+                  return (
+                    <Marker
+                      key={alert.id}
+                      position={[alert.location.latitude, alert.location.longitude]}
+                    >
+                      <Popup>
+                        <strong>{alert.userName}</strong>
+                        <br />
+                        {alert.userEmail}
+                        <br />
+                        {alert.message}
+                        <br />
+                        {new Date(alert.timestamp.seconds * 1000).toString()}
+                      </Popup>
+                    </Marker>
+                  );
+                }
+                return null;
+              })}
           </MapContainer>
         </div>
 
-        {/* Footer */}
         <footer className="bg-gray-900 text-white py-6 mt-12">
           <div className="container mx-auto text-center">
             <p className="text-sm">
