@@ -9,7 +9,6 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import SensorDetailsWithSWR from "./sensorDetails";
 
-// Leaflet Icon setup
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -94,7 +93,6 @@ const Authority = () => {
   return (
     <>
       <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white py-12 px-6">
-        {/* Hero Section */}
         <div className="grid py-8 px-4 mx-auto max-w-screen-xl lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
           <div className="place-self-center mr-auto lg:col-span-7">
             <h1 className="mb-4 max-w-2xl text-4xl font-extrabold leading-none md:text-5xl xl:text-6xl dark:text-white">
@@ -132,7 +130,6 @@ const Authority = () => {
           </div>
         </div>
 
-        {/* Alerts Section */}
         <div className="py-12 px-6 mx-auto max-w-screen-xl" id="alerts">
           <h2 className="text-3xl font-extrabold mb-6">Recent Alerts</h2>
           <ul className="grid gap-6 lg:grid-cols-2">
@@ -165,7 +162,6 @@ const Authority = () => {
           </ul>
         </div>
 
-        {/* Map Section */}
         <div className="py-12 px-6 mx-auto max-w-screen-xl">
           <h2 className="text-3xl font-extrabold mb-6">Incident Locations</h2>
           <MapContainer

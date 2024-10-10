@@ -42,14 +42,27 @@ const MLAnalysis = ({ userSensors }) => {
     }
   }, [userSensors]);
 
-  const handleViewDetails = (sensorName) => {
-    setToast({ show: true, message: `Details for ${sensorName}` });
-
-    // Hide the toast after 3 seconds
-    setTimeout(() => {
-      setToast({ show: false, message: '' });
-    }, 3000);
+  const handleViewDetails = async (sensorName) => {
+    try {
+      const response = await fetch(`https://api.example.com/details?sensor=${sensorName}&key=${REACT_APP_GEMINI_API}`);
+      const data = await response.json();
+      
+      setToast({ show: true, message: `Details for ${sensorName}: ${data.message}` });
+  
+      // Hide the toast after 3 seconds
+      setTimeout(() => {
+        setToast({ show: false, message: '' });
+      }, 3000);
+    } catch (error) {
+      console.error('Error fetching details:', error);
+      setToast({ show: true, message: `Failed to fetch details for ${sensorName}` });
+  
+      setTimeout(() => {
+        setToast({ show: false, message: '' });
+      }, 3000);
+    }
   };
+  
 
   if (userSensors.length === 0) {
     return null; // No sensors to analyze

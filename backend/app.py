@@ -22,21 +22,6 @@ sensor_collection = mongo_db['sensors']
 
 app = Flask(__name__)
 
-@app.route('/api/sensor', methods=['GET'])
-def get_sensor_data():
-    try:
-        # Reference to your Firebase Realtime Database or Firestore
-        sensors_ref = db.collection('sensors')
-        sensors = sensors_ref.stream()
-
-        sensor_data = []
-        for sensor in sensors:
-            sensor_data.append(sensor.to_dict())
-
-        return jsonify(sensor_data), 200
-    except Exception as e:
-        print(f"Error fetching sensor data: {e}")
-        return jsonify({"error": "Failed to fetch sensor data"}), 500
 
 @app.route('/api/webhooks', methods=['POST'])
 def webhook_handler():
