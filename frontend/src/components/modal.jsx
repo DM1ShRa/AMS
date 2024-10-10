@@ -15,6 +15,7 @@ const ModalComponent = ({ show, handleClose, children }) => {
           timestamp: new Date(),
           userName: user?.firstName || "Unknown User",
           userEmail: user?.emailAddresses[0]?.emailAddress || "Unknown Email",
+          userId:user?.id,
           location: {
             latitude: latitude,
             longitude: longitude,

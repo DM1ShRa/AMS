@@ -90,6 +90,9 @@ const Authority = () => {
               </svg>
             </a>
           </div>
+          <div className="hidden lg:mt-10 lg:col-span-5  lg:flex">
+              <img src="https://earthquake.ca.gov/wp-content/uploads/sites/8/2020/09/android_alerts.gif" alt="mockup" className="rounded-lg" />
+            </div>
         </div>
 
         <div className="py-12 px-6 mx-auto max-w-screen-xl" id="alerts">
