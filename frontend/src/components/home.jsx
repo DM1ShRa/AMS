@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import CardComponent from "./CardComponent";
 import SensorSelectionForm from "./sensorSelectionForm";
 import ContactUs from "./ContactUs";
-import { db } from "../Firebase/firebaseConfig";
+import { dbFirestore } from "../Firebase/firebaseConfig";
 import { useAuth } from "@clerk/clerk-react";
-import { doc, getDoc } from "firebase/firestore";
-import MLAnalysis from "./MLAnalysis"; 
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import MLAnalysis from "./MLAnalysis";
+import FeedbackForm from "./feedbackForm";
 
 const Home = () => {
   const { userId } = useAuth();
@@ -13,12 +14,14 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [showSensorForm, setShowSensorForm] = useState(false);
   const [noSensors, setNoSensors] = useState(false);
+  const [feedbackPending, setFeedbackPending] = useState(false);
+  const [feedbackAlertId, setFeedbackAlertId] = useState(null);
 
   const fetchUserSensors = async () => {
     if (userId) {
       try {
         setLoading(true);
-        const userDocRef = doc(db, "users", userId);
+        const userDocRef = doc(dbFirestore, "users", userId);
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
@@ -53,10 +56,34 @@ const Home = () => {
     }
   }, [userId]);
 
+  useEffect(() => {
+    // Fetch the user's document to check if feedback is pending
+    const fetchUserData = async () => {
+      try {
+        const userDoc = await getDoc(doc(dbFirestore, "users", userId));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setFeedbackPending(userData.feedbackPending || false);
+          setFeedbackAlertId(userData.feedbackAlertId || null);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, [userId]);
+
+  const handleFeedbackSubmitted = () => {
+    console.log("Feedback has been submitted for alert:", feedbackAlertId);
+    setFeedbackPending(false); // Assuming after feedback submission, the pending state should be false
+    setFeedbackAlertId(null); // Clear the alert ID
+  };
+
   const handleNoSensorsInstalled = async () => {
     if (userId) {
       try {
-        const userDocRef = doc(db, "users", userId);
+        const userDocRef = doc(dbFirestore, "users", userId);
         await updateDoc(userDocRef, {
           noSensors: true,
         });
@@ -100,7 +127,9 @@ const Home = () => {
                 Accident Management System
               </h1>
               <p className="mb-6 max-w-2xl font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
-              From real-time detection to automated alerts, our system helps save lives by preventing accidents and streamlining emergency responses.
+                From real-time detection to automated alerts, our system helps
+                save lives by preventing accidents and streamlining emergency
+                responses.
               </p>
               <a
                 href="#"
@@ -128,7 +157,11 @@ const Home = () => {
               </a>
             </div>
             <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
-              <img src="https://earthquake.ca.gov/wp-content/uploads/sites/8/2020/09/android_alerts.gif" alt="mockup" className="rounded-lg" />
+              <img
+                src="https://earthquake.ca.gov/wp-content/uploads/sites/8/2020/09/android_alerts.gif"
+                alt="mockup"
+                className="rounded-lg"
+              />
             </div>
           </div>
         </div>
@@ -137,16 +170,17 @@ const Home = () => {
           {/* Text Section */}
           <div>
             <h2 className="mb-4 text-4xl font-extrabold leading-none dark:text-gray-900 ">
-            Empowering safety with intelligent technology and real-time solutions.
+              Empowering safety with intelligent technology and real-time
+              solutions.
             </h2>
             <p className="mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
-            Turning innovation into life-saving actions, one alert at a time.
+              Turning innovation into life-saving actions, one alert at a time.
             </p>
           </div>
           {/* Image Section */}
           <div className="flex flex-col space-y-4">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="grid gap-4">
+              <div class="grid gap-4">
                 <div>
                   <img
                     class="h-auto max-w-full rounded-lg"
@@ -247,7 +281,7 @@ const Home = () => {
         ) : (
           <>
             <div className="py-8 px-6 mx-auto max-w-screen-xl grid gap-12 lg:grid-cols-3">
-              {userSensors && userSensors.includes("FireSensor") && (
+              {userSensors && userSensors.includes("sensor_1") && (
                 <CardComponent
                   imageUrl="https://firetechglobal.com/wp-content/uploads/2024/04/causes-of-fire-incidents-0-1024x683-1.webp"
                   title="Can coffee make you a better developer?"
@@ -255,9 +289,10 @@ const Home = () => {
                   authorName="Jonathan Reinink"
                   authorImage="https://via.placeholder.com/50"
                   date="Aug 18"
+                  sensorId="sensor_1"
                 />
               )}
-              {userSensors && userSensors.includes("GasSensor") && (
+              {userSensors && userSensors.includes("sensor_2") && (
                 <CardComponent
                   imageUrl="https://taraenergy.com/wp-content/uploads/2022/12/Gas-Leaks-Image-of-Gas-Pipe-Blowing-Steam-scaled.jpeg"
                   title="The secret to productivity"
@@ -265,6 +300,15 @@ const Home = () => {
                   authorName="Sarah Doe"
                   authorImage="https://via.placeholder.com/50"
                   date="Sep 25"
+                  sensorId="sensor_2"
+                />
+              )}
+            </div>
+            <div>
+              {feedbackPending && feedbackAlertId && (
+                <FeedbackForm
+                  feedbackAlertId={feedbackAlertId}
+                  onFeedbackSubmitted={handleFeedbackSubmitted}
                 />
               )}
             </div>

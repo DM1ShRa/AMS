@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { db } from "../Firebase/firebaseConfig";
-import { collection, onSnapshot } from "firebase/firestore";
+import { dbFirestore } from "../Firebase/firebaseConfig";
+import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
 import { checkRole } from "../utils/roles";
 import { useUser } from "@clerk/clerk-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import SensorDetailsWithSWR from "./sensorDetails";
 
 // Leaflet Icon setup
 delete L.Icon.Default.prototype._getIconUrl;
@@ -21,6 +22,7 @@ const Authority = () => {
   const navigate = useNavigate();
   const { isLoaded, isSignedIn } = useUser();
   const [alerts, setAlerts] = useState([]);
+  const [feedbacks, setFeedbacks] = useState([]);
 
   const Spinner = () => (
     <div className="flex justify-center items-center min-h-screen">
@@ -39,15 +41,55 @@ const Authority = () => {
   }
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "alerts"), (snapshot) => {
-      const alertData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setAlerts(alertData);
-    });
+    const unsubscribe = onSnapshot(
+      collection(dbFirestore, "alerts"),
+      (snapshot) => {
+        const alertData = snapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .filter((alert) => !alert.isClosed); // Filter out closed alerts
+        setAlerts(alertData);
+      }
+    );
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(dbFirestore, "feedback"),
+      (snapshot) => {
+        const feedbackData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setFeedbacks(feedbackData);
+      }
+    );
+    return () => unsubscribe();
+  }, []);
+
+  const closeAlert = async (id, userId) => {
+    try {
+      // Update the isClosed flag in Firebase for the alert
+      if (!userId) {
+        throw new Error("User ID is undefined or invalid.");
+      }
+      const alertDoc = doc(dbFirestore, "alerts", id);
+      await updateDoc(alertDoc, { isClosed: true });
+
+      // Send feedback request to the user's document
+      const userDoc = doc(dbFirestore, "users", userId); // Assuming you have a users collection
+      await updateDoc(userDoc, { feedbackPending: true, feedbackAlertId: id });
+
+      // Remove the alert from the frontend
+      setAlerts((prevAlerts) => prevAlerts.filter((alert) => alert.id !== id));
+    } catch (error) {
+      console.error("Error closing the alert:", error);
+      alert("Failed to close the alert. Please try again.");
+    }
+  };
 
   return (
     <>
@@ -59,7 +101,8 @@ const Authority = () => {
               Authority Dashboard
             </h1>
             <p className="mb-6 max-w-2xl font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
-              Real-time monitoring and alert response for emergency incidents across the region.
+              Real-time monitoring and alert response for emergency incidents
+              across the region.
             </p>
             <a
               href="#alerts"
@@ -81,7 +124,11 @@ const Authority = () => {
             </a>
           </div>
           <div className="hidden lg:mt-0 lg:col-span-5 lg:flex">
-            <img src="https://earthquake.ca.gov/wp-content/uploads/sites/8/2020/09/android_alerts.gif" alt="alerts mockup" className="rounded-lg" />
+            <img
+              src="https://earthquake.ca.gov/wp-content/uploads/sites/8/2020/09/android_alerts.gif"
+              alt="alerts mockup"
+              className="rounded-lg"
+            />
           </div>
         </div>
 
@@ -90,11 +137,29 @@ const Authority = () => {
           <h2 className="text-3xl font-extrabold mb-6">Recent Alerts</h2>
           <ul className="grid gap-6 lg:grid-cols-2">
             {alerts.map((alert) => (
-              <li key={alert.id} className="p-6 bg-white rounded-lg shadow-md dark:bg-gray-800">
+              <li
+                key={alert.id}
+                className="p-6 bg-white rounded-lg shadow-md dark:bg-gray-800"
+              >
                 <h3 className="text-lg font-bold">{alert.message}</h3>
-                <p className="text-gray-600 dark:text-gray-400">{new Date(alert.timestamp.seconds * 1000).toString()}</p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  {new Date(alert.timestamp.seconds * 1000).toString()}
+                </p>
                 <strong>User Name:</strong> {alert.userName} <br />
                 <strong>User Email:</strong> {alert.userEmail}
+                <br />
+                {alert.sensorId && (
+                  <>
+                    <h4 className="mt-4 text-lg font-bold">Sensor Data</h4>
+                    <SensorDetailsWithSWR sensorId={alert.sensorId} />
+                  </>
+                )}
+                <button
+                  className="mt-4 py-2 px-4 bg-red-500 text-white rounded hover:bg-red-700"
+                  onClick={() => closeAlert(alert.id, alert.userId)}
+                >
+                  Close Alert
+                </button>
               </li>
             ))}
           </ul>
@@ -103,7 +168,11 @@ const Authority = () => {
         {/* Map Section */}
         <div className="py-12 px-6 mx-auto max-w-screen-xl">
           <h2 className="text-3xl font-extrabold mb-6">Incident Locations</h2>
-          <MapContainer center={[19.035, 73.021]} zoom={13} style={{ height: "500px", width: "100%" }}>
+          <MapContainer
+            center={[19.035, 73.021]}
+            zoom={13}
+            style={{ height: "500px", width: "100%" }}
+          >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -111,7 +180,13 @@ const Authority = () => {
             {alerts.map((alert) => {
               if (alert.location?.latitude && alert.location?.longitude) {
                 return (
-                  <Marker key={alert.id} position={[alert.location.latitude, alert.location.longitude]}>
+                  <Marker
+                    key={alert.id}
+                    position={[
+                      alert.location.latitude,
+                      alert.location.longitude,
+                    ]}
+                  >
                     <Popup>
                       <strong>{alert.userName}</strong>
                       <br />
@@ -127,6 +202,42 @@ const Authority = () => {
               return null;
             })}
           </MapContainer>
+        </div>
+
+        <div className="py-12 px-6 mx-auto max-w-screen-xl">
+          <h2 className="text-3xl font-extrabold mb-6">User Feedback</h2>
+          <table className="min-w-full bg-white dark:bg-gray-800">
+            <thead>
+              <tr>
+                <th className="py-2 px-4 border-b dark:border-gray-600">
+                  User ID
+                </th>
+                <th className="py-2 px-4 border-b dark:border-gray-600">
+                  Feedback
+                </th>
+                <th className="py-2 px-4 border-b dark:border-gray-600">
+                  Timestamp
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {feedbacks.map((feedback) => (
+                <tr key={feedback.id}>
+                  <td className="py-2 px-4 border-b dark:border-gray-600">
+                    {feedback.userId}
+                  </td>
+                  <td className="py-2 px-4 border-b dark:border-gray-600">
+                    {feedback.feedback}
+                  </td>
+                  <td className="py-2 px-4 border-b dark:border-gray-600">
+                    {new Date(
+                      feedback.timestamp.seconds * 1000
+                    ).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {/* Footer */}

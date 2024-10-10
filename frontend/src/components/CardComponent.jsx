@@ -54,7 +54,11 @@ const CardComponent = ({
         </div>
       </div>
 
-      <ModalComponent show={showModal} handleClose={handleCloseModal}>
+      <ModalComponent
+        show={showModal}
+        handleClose={handleCloseModal}
+        sensorId={sensorId}
+      >
         <SensorDetailsWithSWR sensorId={sensorId} />
       </ModalComponent>
     </div>

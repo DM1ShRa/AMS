@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
-import { db } from "../Firebase/firebaseConfig";
+import { dbFirestore } from "../Firebase/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { toast, Toaster } from "react-hot-toast";
 import { useForm, Controller } from "react-hook-form";
@@ -9,8 +9,8 @@ import { Switch } from "@headlessui/react";
 import { motion } from "framer-motion";
 
 const sensorOptions = [
-  { value: "FireSensor", label: "Fire Sensor" },
-  { value: "GasSensor", label: "Gas Sensor" },
+  { value: "sensor_1", label: "Sensor_1" },
+  { value: "sensor_2", label: "Sensor_2" },
 ];
 
 const SensorSelectionForm = ({ onSensorsUpdated }) => {
@@ -19,11 +19,13 @@ const SensorSelectionForm = ({ onSensorsUpdated }) => {
   const [noSensors, setNoSensors] = useState(false);
 
   const onSubmit = async (data) => {
-    const selectedSensors = data.sensors ? data.sensors.map((s) => s.value) : [];
+    const selectedSensors = data.sensors
+      ? data.sensors.map((s) => s.value)
+      : [];
     if (userId) {
       try {
         await setDoc(
-          doc(db, "users", userId),
+          doc(dbFirestore, "users", userId),
           {
             Sensors: noSensors ? [] : selectedSensors,
             noSensors: noSensors,
@@ -103,7 +105,7 @@ const SensorSelectionForm = ({ onSensorsUpdated }) => {
           <button
             type="submit"
             className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none"
-            disabled={noSensors || !noSensors && !sensorOptions.length}
+            disabled={noSensors || (!noSensors && !sensorOptions.length)}
           >
             Save Sensors
           </button>
