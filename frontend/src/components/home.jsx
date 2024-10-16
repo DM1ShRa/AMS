@@ -7,6 +7,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import MLAnalysis from "./MLAnalysis";
 import FeedbackForm from "./feedbackForm";
+import AuthResponse from "./AuthResponse";
 
 const Home = () => {
   const { userId } = useAuth();
@@ -284,10 +285,9 @@ const Home = () => {
               {userSensors && userSensors.includes("sensor_1") && (
                 <CardComponent
                   imageUrl="https://firetechglobal.com/wp-content/uploads/2024/04/causes-of-fire-incidents-0-1024x683-1.webp"
-                  title="Can coffee make you a better developer?"
-                  description="Lorem ipsum dolor sit amet, consectetur adipisicing elit."
-                  authorName="Jonathan Reinink"
-                  authorImage="https://via.placeholder.com/50"
+                  title="Sensor_1 : Fire & Gas"
+                  description="This contains two sensor 1.Fire Sensor 2.Gas Sensor"
+                  authorImage="https://www.svgrepo.com/show/451299/sensor.svg"
                   date="Aug 18"
                   sensorId="sensor_1"
                 />
@@ -295,10 +295,19 @@ const Home = () => {
               {userSensors && userSensors.includes("sensor_2") && (
                 <CardComponent
                   imageUrl="https://taraenergy.com/wp-content/uploads/2022/12/Gas-Leaks-Image-of-Gas-Pipe-Blowing-Steam-scaled.jpeg"
-                  title="The secret to productivity"
-                  description="Voluptatibus quia, nulla! Maiores et perferendis eaque."
-                  authorName="Sarah Doe"
-                  authorImage="https://via.placeholder.com/50"
+                  title="Sensor_2 : Fire & Gas"
+                  description="This contains two sensor 1.Fire Sensor 2.Gas Sensor"
+                  authorImage="https://www.svgrepo.com/show/451299/sensor.svg"
+                  date="Sep 25"
+                  sensorId="sensor_2"
+                />
+              )}
+              {userSensors && userSensors.includes("sensor_2") && (
+                <CardComponent
+                  imageUrl="https://taraenergy.com/wp-content/uploads/2022/12/Gas-Leaks-Image-of-Gas-Pipe-Blowing-Steam-scaled.jpeg"
+                  title="Sensor_2 : Fire & Gas"
+                  description="This contains two sensor 1.Fire Sensor 2.Gas Sensor"
+                  authorImage="https://www.svgrepo.com/show/451299/sensor.svg"
                   date="Sep 25"
                   sensorId="sensor_2"
                 />
@@ -315,6 +324,8 @@ const Home = () => {
 
             {/* ML Analysis component */}
             <MLAnalysis userSensors={userSensors} />
+
+            <AuthResponse userLocation="Navi Mumbai" accidentType="fire_accident" />
           </>
         )}
         ;{/* Contact Us section */}

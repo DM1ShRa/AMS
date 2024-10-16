@@ -49,7 +49,7 @@ const SensorDetailsWithSWR = ({ sensorId }) => {
 
   // Use SWR to fetch data every 3 seconds, pass sensorId as key
   const { data, error } = useSWR(sensorId, () => fetcher(sensorId), {
-    refreshInterval: 3000,
+    refreshInterval: 2000,
   });
 
   useEffect(() => {
@@ -105,7 +105,7 @@ const SensorDetailsWithSWR = ({ sensorId }) => {
           <Tooltip
             contentStyle={{ backgroundColor: "#f5f5f5", border: "none" }}
           />
-          <Legend verticalAlign="top" height={36} />
+          <Legend verticalAlign="top" height={40} />
 
           {/* Line for Temperature */}
           <Line

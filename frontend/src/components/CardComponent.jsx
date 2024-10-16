@@ -6,7 +6,6 @@ const CardComponent = ({
   imageUrl,
   title,
   description,
-  authorName,
   authorImage,
   date,
   sensorId,
@@ -45,10 +44,9 @@ const CardComponent = ({
           <img
             className="w-10 h-10 rounded-full mr-4"
             src={authorImage}
-            alt={`Avatar of ${authorName}`}
+
           />
           <div className="text-sm">
-            <p className="text-gray-900 leading-none">{authorName}</p>
             <p className="text-gray-600">{date}</p>
           </div>
         </div>

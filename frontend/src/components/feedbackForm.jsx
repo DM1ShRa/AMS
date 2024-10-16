@@ -44,26 +44,41 @@ const FeedbackForm = ({ feedbackAlertId, onFeedbackSubmitted }) => {
   };
 
   return (
-    <div className="feedback-form p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-xl font-bold">We value your feedback</h2>
-      <p className="text-gray-700 dark:text-gray-400">
-        Your Alert has been resolved. Please provide your feedback
-      </p>
-      <form onSubmit={handleSubmit}>
-        <textarea
-          className="w-full p-2 border rounded"
-          rows="4"
-          value={feedback}
-          onChange={(e) => setFeedback(e.target.value)}
-          placeholder="Provide your feedback on the incident..."
-        ></textarea>
-        <button
-          type="submit"
-          className="mt-4 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700"
-        >
-          Submit Feedback
-        </button>
-      </form>
+    <div className="flex justify-start items-start p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-lg mx-auto">
+      <div className="w-full">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          We value your feedback
+        </h2>
+        <p className="text-gray-700 dark:text-gray-400 mt-2">
+          Your alert has been resolved. Please provide your feedback.
+        </p>
+        <p className="text-gray-700 dark:text-gray-400 mt-4 font-semibold">
+          Format of Feedback:
+        </p>
+        <ul className="list-disc list-inside text-gray-700 dark:text-gray-400 mt-2">
+          <li>Incident Date: </li>
+          <li>Incident Time: </li>
+          <li>Location: </li>
+          <li>Deaths & Injuries: </li>
+          <li>Authority: </li>
+          <li>Personal Recommendations: </li>
+        </ul>
+        <form onSubmit={handleSubmit} className="mt-4">
+          <textarea
+            className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            rows="4"
+            value={feedback}
+            onChange={(e) => setFeedback(e.target.value)}
+            placeholder="Provide your feedback on the incident..."
+          ></textarea>
+          <button
+            type="submit"
+            className="mt-4 py-2 px-5 bg-slate-700 text-white font-medium rounded-lg hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900"
+          >
+            Submit Feedback
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
