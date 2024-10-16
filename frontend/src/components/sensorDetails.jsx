@@ -19,7 +19,8 @@ import { ref, onValue } from "firebase/database";
 import toast from "react-hot-toast";
 
 const TEMP_THRESHOLD = 100;
-const GAS_THRESHOLD = 700;
+const GAS_THRESHOLD = 550;
+const COOLDOWN_PERIOD = 1 *60 * 1000; // 3 seconds in milliseconds
 
 const fetcher = (sensorId) => {
   return new Promise((resolve, reject) => {
@@ -55,6 +56,9 @@ const SensorDetailsWithSWR = ({ sensorId }) => {
     temperature: false,
     gas: false,
   });
+
+  const [lastGasAlertTime, setLastGasAlertTime] = useState(null); // Track last gas alert time
+  const [lastTempAlertTime, setLastTempAlertTime] = useState(null); // Track last temperature alert time
 
   const { data, error } = useSWR(sensorId, () => fetcher(sensorId), {
     refreshInterval: 2000,
@@ -96,17 +100,26 @@ const SensorDetailsWithSWR = ({ sensorId }) => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
           const { latitude, longitude } = position.coords;
+          const now = Date.now();
 
+          // Check for Temperature alert with cooldown
           if (temperature > TEMP_THRESHOLD && !alertTriggered.temperature) {
-            handleAlert("Temperature", latitude, longitude);
-            setAlertTriggered((prev) => ({ ...prev, temperature: true }));
+            if (!lastTempAlertTime || now - lastTempAlertTime > COOLDOWN_PERIOD) {
+              handleAlert("Temperature", latitude, longitude);
+              setLastTempAlertTime(now); // Update last temperature alert time
+              setAlertTriggered((prev) => ({ ...prev, temperature: true }));
+            }
           } else if (temperature <= TEMP_THRESHOLD) {
             setAlertTriggered((prev) => ({ ...prev, temperature: false }));
           }
 
+          // Check for Gas alert with cooldown
           if (gas > GAS_THRESHOLD && !alertTriggered.gas) {
-            handleAlert("Gas", latitude, longitude);
-            setAlertTriggered((prev) => ({ ...prev, gas: true }));
+            if (!lastGasAlertTime || now - lastGasAlertTime > COOLDOWN_PERIOD) {
+              handleAlert("Gas", latitude, longitude);
+              setLastGasAlertTime(now); // Update last gas alert time
+              setAlertTriggered((prev) => ({ ...prev, gas: true }));
+            }
           } else if (gas <= GAS_THRESHOLD) {
             setAlertTriggered((prev) => ({ ...prev, gas: false }));
           }
