@@ -8,6 +8,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import SensorDetailsWithSWR from "./sensorDetails";
+import toast from "react-hot-toast";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -48,7 +49,7 @@ const Authority = () => {
             id: doc.id,
             ...doc.data(),
           }))
-          .filter((alert) => !alert.isClosed); // Filter out closed alerts
+          .filter((alert) => !alert.isClosed);
         setAlerts(alertData);
       }
     );
@@ -71,22 +72,20 @@ const Authority = () => {
 
   const closeAlert = async (id, userId) => {
     try {
-      // Update the isClosed flag in Firebase for the alert
       if (!userId) {
         throw new Error("User ID is undefined or invalid.");
       }
       const alertDoc = doc(dbFirestore, "alerts", id);
       await updateDoc(alertDoc, { isClosed: true });
 
-      // Send feedback request to the user's document
-      const userDoc = doc(dbFirestore, "users", userId); // Assuming you have a users collection
+      const userDoc = doc(dbFirestore, "users", userId);
       await updateDoc(userDoc, { feedbackPending: true, feedbackAlertId: id });
 
-      // Remove the alert from the frontend
       setAlerts((prevAlerts) => prevAlerts.filter((alert) => alert.id !== id));
+      toast.success("Alert closed successfully.");
     } catch (error) {
       console.error("Error closing the alert:", error);
-      alert("Failed to close the alert. Please try again.");
+      toast.error("Failed to close the alert. Please try again.");
     }
   };
 

@@ -2,6 +2,7 @@ import React from "react";
 import { dbFirestore } from "../Firebase/firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { useUser } from "@clerk/clerk-react";
+import { toast } from "react-hot-toast";
 
 const ModalComponent = ({ show, handleClose, children, sensorId }) => {
   const { user } = useUser();
@@ -28,12 +29,24 @@ const ModalComponent = ({ show, handleClose, children, sensorId }) => {
             collection(dbFirestore, "alerts"),
             alertData
           );
+          toast.success("Alert added successfully!"),
+            {
+              duration: 4000,
+            };
           console.log("Alert added with ID:", docRef.id);
         } catch (e) {
+          toast.error("Error adding alert. Please try again."),
+            {
+              duration: 4000,
+            };
           console.error("Error adding alert:", e);
         }
       });
     } else {
+      toast.error("Geolocation is not supported by this browser."),
+        {
+          duration: 4000,
+        };
       console.error("Geolocation is not supported by this browser.");
     }
   };
