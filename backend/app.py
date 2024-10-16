@@ -1,11 +1,17 @@
 import os
+from flask_cors import CORS
 from flask import Flask, request, jsonify
+import pickle
+import pandas as pd
+import numpy as np
 from svix.webhooks import Webhook, WebhookVerificationError
 from dotenv import load_dotenv
 import firebase_admin
 from firebase_admin import credentials, firestore, db as firebase_db
 from pymongo import MongoClient
-from datetime import datetime, timezone
+from datetime import datetime, timezone,timedelta
+from sklearn.preprocessing import StandardScaler
+
 
 load_dotenv()
 
@@ -21,6 +27,7 @@ mongo_db = mongo_client['sensorData']
 sensor_collection = mongo_db['sensors']
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route('/api/webhooks', methods=['POST'])
@@ -102,6 +109,128 @@ def firebase_listener():
     ref = firebase_db.reference('/')
     ref.listen(store_sensor_data_in_mongodb)
     print("Listening for Firebase Realtime Database changes...")
+
+def load_model():
+    with open('maintenance_model.pkl', 'rb') as f:
+        model = pickle.load(f)
+    return model
+
+def load_authority_model():
+    with open('authority_model.pkl', 'rb') as f:
+        model = pickle.load(f)
+    return model
+
+def load_sensor_data():
+    return pd.read_csv('expanded_sensor_data.csv')
+
+def feature_engineering(sensor_data):
+    sensor_data['temperature_roll_mean'] = sensor_data['temperature'].rolling(window=3).mean()
+    sensor_data['gas_roll_mean'] = sensor_data['gas_value'].rolling(window=3).mean()
+    sensor_data['timestamp'] = pd.to_datetime(sensor_data['timestamp'])
+    sensor_data['hour'] = sensor_data['timestamp'].dt.hour
+    sensor_data['day_of_week'] = sensor_data['timestamp'].dt.dayofweek
+    sensor_data.bfill(inplace=True)
+    return sensor_data
+
+def aggregate_data_per_sensor(sensor_data):
+    return sensor_data.groupby('sensor_id').agg({
+        'temperature': 'mean',
+        'gas_value': 'mean',
+        'temperature_roll_mean': 'mean',
+        'gas_roll_mean': 'mean',
+        'hour': 'mean',
+        'day_of_week': 'mean'
+    }).reset_index()
+
+def prepare_data(sensor_data):
+    feature_cols = ['temperature', 'gas_value', 'temperature_roll_mean', 'gas_roll_mean', 'hour', 'day_of_week']
+    X = sensor_data[feature_cols]
+    sensor_ids = sensor_data['sensor_id']
+    
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+    return X_scaled, sensor_ids
+
+@app.route('/predict', methods=['POST'])
+def get_predictions():
+    sensor_data = load_sensor_data()
+    sensor_data = feature_engineering(sensor_data)
+    aggregated_data = aggregate_data_per_sensor(sensor_data)
+    
+    X_scaled, sensor_ids = prepare_data(aggregated_data)
+    
+    model = load_model()
+    predictions = model.predict(X_scaled)
+
+    results = []
+    for i, pred in enumerate(predictions):
+        results.append({
+            'sensor_id': sensor_ids.iloc[i],
+            'next_maintenance': (datetime.now() + timedelta(days=np.random.randint(1, 30))).strftime('%Y-%m-%d'),
+            'severity': int(pred)
+        })
+    
+    return jsonify(results)
+
+@app.route('/predict_authority', methods=['POST'])
+def predict_fastest_authority():
+    try:
+        data = request.json
+        user_location = data.get('location')
+        accident_type = data.get('accident_type')
+
+        if not user_location or not accident_type:
+            return jsonify({"error": "Invalid input"}), 400
+
+        authority_model = load_authority_model()
+
+        location_mapping = {
+            'Navi Mumbai': 0,
+            'Chembur': 1,
+            'Kurla': 2,
+            'Vashi': 3,
+            'Panvel': 4
+        }
+        accident_type_mapping = {
+            'fire_accident': 0,
+            'gas_leak_accident': 1
+        }
+        
+        location_code = location_mapping.get(user_location)
+        accident_type_code = accident_type_mapping.get(accident_type)
+
+        if location_code is None or accident_type_code is None:
+            return jsonify({"error": "Invalid location or accident type"}), 400
+
+        input_data = pd.DataFrame([[location_code, accident_type_code]], columns=['user_location', 'accident_type'])
+        prediction = authority_model.predict(input_data)
+
+        authority_mapping = {
+            0: "Police Department",
+            1: "Fire Department",
+            2: "Municipal Authority Ambulance"
+        }
+
+        return jsonify({
+            "predicted_authority": authority_mapping.get(prediction[0]),
+            "status": "Prediction successful"
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/details', methods=['GET'])
+def get_sensor_details():
+    sensor_name = request.args.get('sensor')
+    
+    return jsonify({
+        "sensor": sensor_name,
+        "message": f"Details for {sensor_name}",
+        "status": "Operational",
+        "last_maintenance": (datetime.now() - timedelta(days=np.random.randint(1, 30))).strftime('%Y-%m-%d')
+    })
+
 
 
 if __name__ == '__main__':

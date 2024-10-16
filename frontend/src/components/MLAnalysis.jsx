@@ -1,23 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { FaTools, FaCheckCircle, FaExclamationCircle, FaWrench } from "react-icons/fa";
-
-// Mock function to simulate predictive maintenance calculation
-const calculatePredictions = (sensors) => {
-  const predictions = sensors.map((sensor) => {
-    const nextMaintenanceDate = new Date(
-      Date.now() + Math.random() * 10000000000
-    );
-    const severityLevel = Math.floor(Math.random() * 3) + 1; // Random severity between 1 and 3
-    return {
-      sensorName: sensor,
-      nextMaintenance: nextMaintenanceDate.toDateString(),
-      severity: severityLevel,
-    };
-  });
-  return predictions;
-};
-
-// Icon and color mapping based on severity level
+import {
+  FaTools,
+  FaCheckCircle,
+  FaExclamationCircle,
+  FaWrench,
+} from "react-icons/fa";
+import { toast } from "react-hot-toast";
 const getSeverityIcon = (severity) => {
   switch (severity) {
     case 1:
@@ -33,39 +21,68 @@ const getSeverityIcon = (severity) => {
 
 const MLAnalysis = ({ userSensors }) => {
   const [predictions, setPredictions] = useState([]);
-  const [toast, setToast] = useState({ show: false, message: '' });
 
   useEffect(() => {
+    const fetchPredictions = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/predict", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ sensors: userSensors }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const data = await response.json();
+        setPredictions(data);
+      } catch (error) {
+        console.error("Error fetching predictions:", error);
+      }
+    };
+
     if (userSensors.length > 0) {
-      const predictionResults = calculatePredictions(userSensors);
-      setPredictions(predictionResults);
+      fetchPredictions();
     }
   }, [userSensors]);
 
   const handleViewDetails = async (sensorName) => {
     try {
-      const response = await fetch(`https://api.example.com/details?sensor=${sensorName}&key=${REACT_APP_GEMINI_API}`);
+      const response = await fetch(
+        `http://localhost:5000/details?sensor=${sensorName}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
       const data = await response.json();
-      
-      setToast({ show: true, message: `Details for ${sensorName}: ${data.message}` });
-  
-      // Hide the toast after 3 seconds
-      setTimeout(() => {
-        setToast({ show: false, message: '' });
-      }, 3000);
+      toast(
+        <div>
+          <strong>Details for {sensorName}:</strong>
+          <br />
+          <span>Status: {data.status}</span>
+          <br />
+          <span>Last Maintenance: {data.last_maintenance}</span>
+        </div>
+      ),
+        {
+          duration: 3000,
+        };
     } catch (error) {
-      console.error('Error fetching details:', error);
-      setToast({ show: true, message: `Failed to fetch details for ${sensorName}` });
-  
-      setTimeout(() => {
-        setToast({ show: false, message: '' });
-      }, 3000);
+      console.error("Error fetching details:", error);
+      toast.error(`Failed to fetch details for ${sensorName}`),
+        {
+          duration: 3000,
+        };
     }
   };
-  
 
   if (userSensors.length === 0) {
-    return null; // No sensors to analyze
+    return null;
   }
 
   return (
@@ -73,7 +90,7 @@ const MLAnalysis = ({ userSensors }) => {
       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
         Predictive Maintenance Analysis
       </h2>
-      
+
       <div className="grid gap-6 lg:grid-cols-3">
         {predictions.map((prediction, index) => (
           <div
@@ -82,46 +99,29 @@ const MLAnalysis = ({ userSensors }) => {
           >
             <div>
               <h3 className="text-xl font-semibold dark:text-white mb-4">
-                {prediction.sensorName} Maintenance
+                {prediction.sensor_id} Maintenance
               </h3>
               <p className="text-gray-700 dark:text-gray-400">
                 Next maintenance predicted on:{" "}
                 <span className="font-bold text-gray-900 dark:text-white">
-                  {prediction.nextMaintenance}
+                  {prediction.next_maintenance}
                 </span>
               </p>
             </div>
             <div className="flex justify-between items-center mt-4">
-              {/* Displaying the severity level with color and icon */}
               <span className="text-lg font-bold dark:text-white">
                 Severity: {getSeverityIcon(prediction.severity)}
               </span>
               <button
                 className="text-primary-700 dark:text-primary-400 underline hover:text-primary-900"
-                onClick={() => handleViewDetails(prediction.sensorName)}
+                onClick={() => handleViewDetails(prediction.sensor_id)}
               >
                 View Details
               </button>
             </div>
-            {/* Collapsible section for additional details */}
-            <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-900 rounded-lg">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Last Maintenance: {new Date(Date.now() - Math.random() * 10000000000).toDateString()}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Status: {prediction.severity === 3 ? "Critical" : "Good Condition"}
-              </p>
-            </div>
           </div>
         ))}
       </div>
-
-      {/* Toast Notification */}
-      {toast.show && (
-        <div className="fixed top-5 right-5 bg-gray-700 text-white px-4 py-2 rounded-lg shadow-lg transition-opacity duration-300 ease-in-out">
-          {toast.message}
-        </div>
-      )}
     </div>
   );
 };

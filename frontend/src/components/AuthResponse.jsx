@@ -1,32 +1,45 @@
 import React, { useState } from "react";
+import { toast } from "react-hot-toast";
 
 const AuthResponse = ({ userLocation, accidentType }) => {
   const [predictedAuthority, setPredictedAuthority] = useState(null);
   const [error, setError] = useState(null);
 
-  const randomAuthorities = [
-    "Fire Department",
-    "Police Department",
-    "Municipal Authority Ambulance",
-  ];
-
-  const predictAuthority = () => {
+  const predictAuthority = async () => {
     try {
-      // Simulate a delay to mimic an API call
-      setTimeout(() => {
-        // Randomly select an authority from the array
-        const randomIndex = Math.floor(Math.random() * randomAuthorities.length);
-        setPredictedAuthority(randomAuthorities[randomIndex]);
-      }, 1000); // 1-second delay for simulation
+      const response = await fetch("http://localhost:5000/predict_authority", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          location: userLocation,
+          accident_type: accidentType,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+      setPredictedAuthority(data.predicted_authority);
+      toast.success(
+        `Predicted fastest responding authority: ${data.predicted_authority}`
+      );
     } catch (err) {
-      setError("Error simulating prediction");
+      setError("Error predicting authority");
+      toast.error("Error predicting authority");
+      console.error(err);
     }
   };
 
   return (
     <div className="py-12 px-6 mx-auto max-w-screen-xl">
       <div className="bg-white p-4 rounded-lg shadow-lg max-w-md mt-4">
-        <h2 className="text-lg font-bold mb-2">Authority Response Prediction</h2>
+        <h2 className="text-lg font-bold mb-2">
+          Authority Response Prediction
+        </h2>
         <button
           onClick={predictAuthority}
           className="bg-slate-500 text-white px-4 py-2 rounded-lg"
@@ -35,7 +48,9 @@ const AuthResponse = ({ userLocation, accidentType }) => {
         </button>
         {predictedAuthority && (
           <div className="mt-4">
-            <p className="text-lg">Fastest Responding Authority: {predictedAuthority}</p>
+            <p className="text-lg">
+              Fastest Responding Authority: {predictedAuthority}
+            </p>
           </div>
         )}
         {error && <p className="text-red-500 mt-2">{error}</p>}
