@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { dbFirestore } from "../Firebase/firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { useUser } from "@clerk/clerk-react";
@@ -6,8 +6,14 @@ import { toast } from "react-hot-toast";
 
 const ModalComponent = ({ show, handleClose, children, sensorId }) => {
   const { user } = useUser();
+  const [alertSent, setAlertSent] = useState(false); // State to track if alert has been sent
 
   const handleAlert = async () => {
+    if (alertSent) {
+      toast.error("Alert has already been sent.");
+      return; // Prevent further alert sending
+    }
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(async (position) => {
         const { latitude, longitude } = position.coords;
@@ -16,7 +22,6 @@ const ModalComponent = ({ show, handleClose, children, sensorId }) => {
           timestamp: new Date(),
           userName: user?.firstName || "Unknown User",
           userEmail: user?.emailAddresses[0]?.emailAddress || "Unknown Email",
-
           location: {
             latitude: latitude,
             longitude: longitude,
@@ -29,24 +34,16 @@ const ModalComponent = ({ show, handleClose, children, sensorId }) => {
             collection(dbFirestore, "alerts"),
             alertData
           );
-          toast.success("Alert added successfully!"),
-            {
-              duration: 4000,
-            };
+          toast.success("Alert added successfully!");
           console.log("Alert added with ID:", docRef.id);
+          setAlertSent(true); // Mark alert as sent
         } catch (e) {
-          toast.error("Error adding alert. Please try again."),
-            {
-              duration: 4000,
-            };
+          toast.error("Error adding alert. Please try again.");
           console.error("Error adding alert:", e);
         }
       });
     } else {
-      toast.error("Geolocation is not supported by this browser."),
-        {
-          duration: 4000,
-        };
+      toast.error("Geolocation is not supported by this browser.");
       console.error("Geolocation is not supported by this browser.");
     }
   };

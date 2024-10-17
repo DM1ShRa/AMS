@@ -41,11 +41,7 @@ const CardComponent = ({
           </button>
         </div>
         <div className="flex items-center">
-          <img
-            className="w-10 h-10 rounded-full mr-4"
-            src={authorImage}
-
-          />
+          <img className="w-10 h-10 rounded-full mr-4" src={authorImage} />
           <div className="text-sm">
             <p className="text-gray-600">{date}</p>
           </div>
@@ -57,7 +53,10 @@ const CardComponent = ({
         handleClose={handleCloseModal}
         sensorId={sensorId}
       >
-        <SensorDetailsWithSWR sensorId={sensorId} />
+        <SensorDetailsWithSWR
+          sensorId={sensorId}
+          alertThresholds={{ temperatureThreshold: 100, gasThreshold: 550 }}
+        />
       </ModalComponent>
     </div>
   );
