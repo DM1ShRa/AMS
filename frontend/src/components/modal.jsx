@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { dbFirestore } from "../Firebase/firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { useUser } from "@clerk/clerk-react";
@@ -6,12 +6,13 @@ import { toast } from "react-hot-toast";
 
 const ModalComponent = ({ show, handleClose, children, sensorId }) => {
   const { user } = useUser();
-  const [alertSent, setAlertSent] = useState(false); // State to track if alert has been sent
+  const [alertSent, setAlertSent] = useState(false);
+  const audioRef = useRef(null); // Create a ref for the audio element
 
   const handleAlert = async () => {
     if (alertSent) {
       toast.error("Alert has already been sent.");
-      return; // Prevent further alert sending
+      return;
     }
 
     if (navigator.geolocation) {
@@ -36,7 +37,8 @@ const ModalComponent = ({ show, handleClose, children, sensorId }) => {
           );
           toast.success("Alert added successfully!");
           console.log("Alert added with ID:", docRef.id);
-          setAlertSent(true); // Mark alert as sent
+          setAlertSent(true);
+          audioRef.current.play(); // Play the alert sound
         } catch (e) {
           toast.error("Error adding alert. Please try again.");
           console.error("Error adding alert:", e);
@@ -52,7 +54,7 @@ const ModalComponent = ({ show, handleClose, children, sensorId }) => {
 
   return (
     <div className="modal-backdrop fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="modal-content bg-white p-6 rounded-md shadow-lg max-w-md w-full max-h-[90vh] overflow-auto">
+      <div className="modal-content bg-white p-6 rounded-md shadow-lg max-w-[90vh] w-full max-h-[90vh] overflow-auto">
         <button
           className="modal-close float-right text-gray-500 hover:text-gray-700 transition duration-300 ease-in-out"
           onClick={handleClose}
@@ -83,6 +85,9 @@ const ModalComponent = ({ show, handleClose, children, sensorId }) => {
           </button>
         </div>
       </div>
+
+      {/* Hidden audio element */}
+      <audio ref={audioRef} src="/alert-33762.mp3" />
     </div>
   );
 };

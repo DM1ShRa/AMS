@@ -14,7 +14,7 @@ const Navbar = () => {
     <nav className="bg-transparent p-4">
       <div className="container mx-auto flex items-center justify-between">
         <NavLink to="/" className="text-black font-bold text-xl">
-          RakshaNetra
+        <img src="RakshaNetra.jpeg" height={70} width={70}/>
         </NavLink>
         <div className="flex-1 flex justify-center items-center space-x-4">
           <>

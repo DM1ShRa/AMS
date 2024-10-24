@@ -20,9 +20,10 @@ L.Icon.Default.mergeOptions({
 
 const Authority = () => {
   const navigate = useNavigate();
-  const { isLoaded, isSignedIn } = useUser();
+  const { user, isLoaded, isSignedIn } = useUser();
   const [alerts, setAlerts] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
+  const [authorityType, setAuthorityType] = useState("");
 
   const Spinner = () => (
     <div className="flex justify-center items-center min-h-screen">
@@ -39,6 +40,11 @@ const Authority = () => {
     navigate("/");
     return null;
   }
+  useEffect(() => {
+    if (user?.publicMetadata?.authorityType) {
+      setAuthorityType(user.publicMetadata.authorityType);
+    }
+  }, [user]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -95,7 +101,7 @@ const Authority = () => {
         <div className="grid py-8 px-4 mx-auto max-w-screen-xl lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
           <div className="place-self-center mr-auto lg:col-span-7">
             <h1 className="mb-4 max-w-2xl text-4xl font-extrabold leading-none md:text-5xl xl:text-6xl dark:text-white">
-              Authority Dashboard
+              Authority Dashboard - {authorityType}
             </h1>
             <p className="mb-6 max-w-2xl font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
               Real-time monitoring and alert response for emergency incidents
