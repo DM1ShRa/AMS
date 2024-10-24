@@ -168,7 +168,13 @@ const Authority = () => {
                 {alert.sensorId && (
                   <>
                     <h4 className="mt-4 text-lg font-bold">Sensor Data</h4>
-                    <SensorDetailsWithSWR sensorId={alert.sensorId} />
+                    <SensorDetailsWithSWR
+                      sensorId={alert.sensorId}
+                      alertThresholds={{
+                        temperatureThreshold: alert.temperatureThreshold,
+                        gasThreshold: alert.gasThreshold,
+                      }}
+                    />
                   </>
                 )}
                 <button
